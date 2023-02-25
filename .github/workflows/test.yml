@@ -1,0 +1,51 @@
+---
+name: Run tests
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches: [master]
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+      - 'README.md'
+      - '.github/workflows/test.yml'
+  pull_request:
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+      - 'README.md'
+      - '.github/workflows/test.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - '3.9'
+          - '3.10'
+          - '3.11'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install tox
+        run: pip install tox tox-gh-actions
+
+      - name: Cache tox environments
+        uses: actions/cache@v1
+        with:
+          path: .tox
+          key: tox|${{ hashFiles('tox.ini')}}
+
+      - name: Test package
+        run: tox
+
+      - name: Run codacy-coverage-reporter
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage.xml

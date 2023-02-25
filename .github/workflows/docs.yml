@@ -1,0 +1,54 @@
+# inspired on
+# https://github.com/mitmproxy/pdoc/blob/main/.github/workflows/docs.yml
+---
+name: build API reference documentation
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - master
+    paths:
+      - "**.py"
+      - ".github/workflows/docs.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: cache poetry environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'poetry'
+
+      - name: install package
+        run: poetry install --with docs
+
+      - name: generate documentation HTML
+        run: poetry run pdoc -o pdocs --docformat google ./pagerduty
+
+      - name: upload documentation HTML to GitHub pages
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: pdocs/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v1
