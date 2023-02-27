@@ -1,24 +1,59 @@
 """PagerDuty client API for the interview."""
+from typing import Any, List
+
+import requests
 
 __version__ = "0.1.0"
 
 
-def fib(number: int) -> int:
-    """Compute an element in the fibonacci sequence.
+class PagerDutyClient:
+    """PagerDuty API client."""
 
-    >>> fib(0)
-    0
+    def __init__(self, auth_token: str) -> None:
+        """Initialize the client for a certain account.
 
-    Args:
-        number (int): the position in the sequence.
+        Args:
+            auth_token (str): the account's authentication token
+        """
+        self.auth_token: str = auth_token
 
-    Returns:
-        The number-th element in the fibonacci sequence.
-    """
-    if number == 0:
-        return 0
+    def _request(self, method: str, resource: str, **kwargs: Any) -> requests.Response:
+        """Sends an authenticated HTTP request to PagerDuty API server.
 
-    if number == 1:
-        return 1
+        Args:
+            method (str): the HTTP method to apply to the resource.
+            resource (str): the request path
+                            identifying the resource that the request targets.
+            kwargs: requests.request method kwargs
 
-    return fib(number - 1) + fib(number - 2)
+        Returns:
+            The requests.Response received from the PagerDuty server.
+        """
+        if "headers" not in kwargs:
+            kwargs["headers"] = {}
+        kwargs["headers"]["Authorization"] = f"Token token={self.auth_token}"
+        return requests.request(
+            method, url=f"https://api.pagerduty.com/{resource}", timeout=4, **kwargs
+        )
+
+    def get_abilities(self) -> List[str]:
+        """List the abilities for the account.
+
+        Returns:
+            The list of this account's abilities.
+        """
+        response: requests.Response = self._request("GET", "/abilities")
+        ablilities: List[str] = response.json()["abilities"]
+        return ablilities
+
+    def test_ability(self, ability: str) -> bool:
+        """Test whether the account has a given ability.
+
+        Args:
+            ability (str): the ability to test.
+
+        Returns:
+            True iff the account has the ability.
+        """
+        response = self._request("GET", f"/abilities/{ability}")
+        return response.status_code == 204

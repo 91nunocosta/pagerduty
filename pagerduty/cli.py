@@ -1,16 +1,27 @@
-"""Provide the command line interface prototype_python_library."""
+"""Provide the command line interface for PagerDuty API."""
+import os
+
 import typer
 
-from pagerduty import fib
+from pagerduty import PagerDutyClient
 
-app: typer.Typer = typer.Typer()
+pagerduty: typer.Typer = typer.Typer()
+pagerduty_abilities: typer.Typer = typer.Typer()
+pagerduty.add_typer(pagerduty_abilities, name="abilities")
 
 
-@app.command()
-def fibbonacy(position: int) -> None:
-    """Compute the number at a certain position in the fibbonacy sequence.
+def create_pagerduty_client() -> PagerDutyClient:
+    """Create a PagerDuty client configured from environment variables.
 
-    Args:
-        position (int): position of fibbonacy sequence to compute.
+    Returns:
+        A PagerDuty client instance.
     """
-    typer.echo(fib(position))
+    return PagerDutyClient(auth_token=os.environ["PAGERDUTY_TOKEN"])
+
+
+@pagerduty_abilities.command(name="list")
+def list_abilities() -> None:
+    """List account ablilities."""
+    pagerduty_client = create_pagerduty_client()
+    typer.echo("The account has the following abilities: ")
+    typer.echo_via_pager(os.linesep.join(pagerduty_client.get_abilities()))

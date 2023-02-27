@@ -8,10 +8,11 @@ repository = "https://github.com/91nunocosta/pagerduty/"
 documentation = "https://91nunocosta.github.io/pagerduty/pagerduty.html"
 
 [tool.poetry.scripts]
-pagerduty = "pagerduty.cli:app"
+pagerduty = "pagerduty.cli:pagerduty"
 [tool.poetry.dependencies]
-python = ">=3.8,<4.0"
+python = ">=3.8.1,<4.0"
 typer = {extras = ["all"], version = "^0.7.0"}
+requests = "^2.28.2"
 [tool.poetry.group.lint]
 optional = true
 
@@ -19,6 +20,10 @@ optional = true
 pre-commit = "^2.15.0"
 mypy = "^1.0.0"
 pylint = "^2.16.1"
+bandit = "^1.7.4"
+flake8 = "^6.0.0"
+types-requests = "^2.28.11.15"
+darglint = "^1.8.1"
 
 [tool.poetry.group.test]
 optional = true

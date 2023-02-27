@@ -11,9 +11,11 @@ pip install pagerduty
 ## Usage
 
 ```python
->>> from pagerduty import fib
->>> fib(0)
-0
+>>> from pagerduty import PagerDutyClient
+>>> import os
+>>> client = PagerDutyClient(auth_token=os.environ["PAGERDUTY_TOKEN"])
+>>> client.test_ability("teams")
+True
 
 ```
 
