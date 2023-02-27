@@ -25,3 +25,10 @@ def list_abilities() -> None:
     pagerduty_client = create_pagerduty_client()
     typer.echo("The account has the following abilities: ")
     typer.echo_via_pager(os.linesep.join(pagerduty_client.get_abilities()))
+
+
+@pagerduty_abilities.command(name="test")
+def test_ability(ability: str) -> None:
+    """Test if the account has an ablility."""
+    pagerduty_client = create_pagerduty_client()
+    typer.echo_via_pager("yes" if pagerduty_client.test_ability(ability) else "no")
