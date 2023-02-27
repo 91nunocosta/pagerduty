@@ -5,6 +5,31 @@ import pytest
 
 import pagerduty
 
+RESOURCE_WITH_MULTIVALUE_QUERY = pagerduty.PagerDutyResource(
+    ["addons"],
+    query={
+        "limit": 10,
+        "offset": 10,
+        "total": True,
+        "filter": "full_page_addon",
+        # "include": ["services", "services"],
+        "services_ids": ["PKX7619", "PKX7620"],
+    },
+)
+
+
+def test_create_resource() -> None:
+    """Test creating a REST resource."""
+    resource = pagerduty.PagerDutyResource(["analytics", "metrics", "incidents", "all"])
+    assert resource.uri() == "https://api.pagerduty.com/analytics/metrics/incidents/all"
+
+    resource = RESOURCE_WITH_MULTIVALUE_QUERY
+    assert (
+        resource.uri() == "https://api.pagerduty.com/addons?"
+        "limit=10&offset=10&total=True&filter=full_page_addon&"
+        "services_ids=%5B%27PKX7619%27%2C+%27PKX7620%27%5D"
+    )
+
 
 @pytest.fixture(name="pagerduty_client")
 def create_pagerduty_client() -> pagerduty.PagerDutyClient:
@@ -26,7 +51,20 @@ def test_create_pagerduty_client(pagerduty_client: pagerduty.PagerDutyClient) ->
 def test_pagerduty__request(pagerduty_client: pagerduty.PagerDutyClient) -> None:
     """Test PagerDutyClient request."""
     response = pagerduty_client._request(  # pylint: disable=protected-access
-        "GET", "/abilities"
+        "GET",
+        pagerduty.PagerDutyResource(["abilities"]),
+    )
+    assert response.status_code == 200
+
+    with pytest.raises(RuntimeError):
+        pagerduty_client._request(  # pylint: disable=protected-access
+            "GET",
+            pagerduty.PagerDutyResource(["addons"], query={"limit": -1}),
+        )
+
+    response = pagerduty_client._request(  # pylint: disable=protected-access
+        "GET",
+        RESOURCE_WITH_MULTIVALUE_QUERY,
     )
     assert response.status_code == 200
 
