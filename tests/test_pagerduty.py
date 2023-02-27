@@ -78,3 +78,23 @@ def test_pagerduty_get_abilities(pagerduty_client: pagerduty.PagerDutyClient) ->
 def test_pagerduty_test_abilities(pagerduty_client: pagerduty.PagerDutyClient) -> None:
     """Test testing an ability with PagerDutyClient."""
     assert pagerduty_client.test_ability("teams")
+
+
+def test_pagerduty_get_users(pagerduty_client: pagerduty.PagerDutyClient) -> None:
+    """Test listing users from PagerDutyClient."""
+    users = pagerduty_client.get_users()
+    assert len(users) >= 1, users
+
+
+def test_pagerduty_get_user(pagerduty_client: pagerduty.PagerDutyClient) -> None:
+    """Test getting a users from PagerDutyClient."""
+    user = pagerduty_client.get_user("PLOASXQ")
+    assert len(user) >= 1
+
+
+def test_pagerduty_get_contact_method(
+    pagerduty_client: pagerduty.PagerDutyClient,
+) -> None:
+    """Test getting a user contact method from PagerDutyClient."""
+    contact_method = pagerduty_client.get_contact_method("PLOASXQ", "PSMLP14")
+    assert len(contact_method) >= 1

@@ -32,3 +32,24 @@ def test_ability(ability: str) -> None:
     """Test if the account has an ablility."""
     pagerduty_client = create_pagerduty_client()
     typer.echo_via_pager("yes" if pagerduty_client.test_ability(ability) else "no")
+
+
+@pagerduty.command(name="users")
+def users() -> None:
+    """Test getting users"""
+    pagerduty_client = create_pagerduty_client()
+    typer.echo_via_pager(
+        os.linesep.join(str(user) for user in pagerduty_client.get_users())
+    )
+
+
+@pagerduty.command(name="contacts")
+def contacts(user_id: str) -> None:
+    """Test getting user contacts"""
+    pagerduty_client = create_pagerduty_client()
+    user = pagerduty_client.get_user(user_id)
+    user_contacts = [
+        pagerduty_client.get_contact_method(user_id, contact["id"])
+        for contact in user["contact_methods"]
+    ]
+    typer.echo_via_pager(os.linesep.join(str(contact) for contact in user_contacts))

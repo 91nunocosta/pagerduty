@@ -107,3 +107,44 @@ class PagerDutyClient:
             PagerDutyResource(["abilities", ability]),
         )
         return response.status_code == 204
+
+    def get_users(self) -> List[Dict[str, Any]]:
+        """List users.
+
+        Returns:
+            List of users.
+        """
+        response = self._request("GET", PagerDutyResource(["users"]))
+
+        return [
+            {
+                "id": user["id"],
+                "name": user["name"],
+                "contacts": user["contact_methods"],
+            }
+            for user in response.json()["users"]
+        ]
+
+    def get_user(self, _id: str) -> Any:
+        """Get a user.
+
+        Returns:
+            A user's details.
+        """
+        response = self._request(
+            "GET",
+            PagerDutyResource(["users", _id]),
+        )
+        return response.json()["user"]
+
+    def get_contact_method(self, user_id: str, _id: str) -> Any:
+        """Get a user contact method.
+
+        Returns:
+            A user's contact method details.
+        """
+        response = self._request(
+            "GET",
+            PagerDutyResource(["users", user_id, "contact_methods", _id]),
+        )
+        return response.json()

@@ -17,3 +17,11 @@ def test_app() -> None:
     result = runner.invoke(pagerduty, ["abilities", "test", "teams"])
     assert result.exit_code == 0
     assert result.output.strip() == "yes"
+
+    result = runner.invoke(pagerduty, ["users"])
+    assert result.exit_code == 0
+    assert len(result.output.strip().split(os.linesep)) >= 1
+
+    result = runner.invoke(pagerduty, ["contacts", "PLOASXQ"])
+    assert result.exit_code == 0
+    assert len(result.output.strip().split(os.linesep)) >= 1
